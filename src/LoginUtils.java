@@ -16,8 +16,6 @@ public class LoginUtils {
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-		
-		System.out.println(con);
 		return con;
 	}
 	

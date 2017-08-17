@@ -37,7 +37,6 @@ public class ConnectionThread extends Thread {
 	@Override
 	public void run(){
 		
-		System.out.println(username + "ConnectionThread started");
 		
 	}
 	

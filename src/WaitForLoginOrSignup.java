@@ -27,16 +27,19 @@ public class WaitForLoginOrSignup extends Thread{
 		
 		while(running){
 			try {
-				int i = dIn.readInt();
-				
-				if(i==1){
-					String username = dIn.readUTF();
-		            String password = dIn.readUTF();
-					System.out.println("Login Request from username "+username);
+				String i = dIn.readUTF();
+				String full_name;
+				String username;
+				String password;
+				switch(i){
+				case "1":				//For Login
+					username = dIn.readUTF();
+		            password = dIn.readUTF();
+		            System.out.println("Login Request from username "+username);
 		            
 		            if(LoginUtils.isUser(username, password)){
-		            	String str = LoginUtils.getFullName(username);
-		            	ConnectionThread ct = new ConnectionThread(socket, str, username, dIn, dOut);
+		            	full_name = LoginUtils.getFullName(username);
+		            	ConnectionThread ct = new ConnectionThread(socket, full_name, username, dIn, dOut);
 		            	ServerBL.addPlayer(ct);
 		            	ct.start();
 		            	System.out.println(username + " connected.");
@@ -45,16 +48,16 @@ public class WaitForLoginOrSignup extends Thread{
 		            	dOut.writeUTF("Invalid username or password");
 		            	System.out.println("Invalid username or password ("+ username +", "+ password +")");
 		            }
-				}else if(i==2){
-					
-					String full_name = dIn.readUTF();
-					String username = dIn.readUTF();
-		            String password = dIn.readUTF();
+					break;
+				case "2":				//For SignUp
 					System.out.println("New signup Request");
+					full_name = dIn.readUTF();
+					username = dIn.readUTF();
+		            password = dIn.readUTF();
 		            
 		            if(LoginUtils.isUser(username, password)){
 		            	dOut.writeUTF("Username "+ username + " is already a user.");
-		            	System.out.println("Username "+ username + " is already a user.");
+		            	System.out.println(username + " is already a user.");
 		            }else{
 		            	LoginUtils.registerUser(full_name,username,password);
 		            	dOut.writeUTF("Successfully Registered");
@@ -64,8 +67,8 @@ public class WaitForLoginOrSignup extends Thread{
 		            	ct.start();
 		            	running = false;
 		            }
-					
-				}else{
+					break;
+				default:
 					closeCon();
 					running = false;
 				}
