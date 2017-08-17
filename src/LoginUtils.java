@@ -48,22 +48,45 @@ public class LoginUtils {
 	}
 	
 	public static boolean isUser(String user,String pass){
-		String password=null;
 		Connection conn = getCon();
 		
 		try {
 			if(conn!=null)
 			{
-				String sql = "SELECT password FROM user_data WHERE username = ? ";
+				String sql = "SELECT * FROM user_data WHERE username = ? AND password = ? ";
+				PreparedStatement ps = conn.prepareStatement(sql);
+				
+				ps.setString(1, user);
+				ps.setString(2, pass);
+				ResultSet rs = ps.executeQuery();
+				
+				if(rs.next()){	
+					System.out.println(user+"---");
+					return true; 
+				}
+			}
+			
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		
+		return false;
+	}
+	
+	public static boolean isUser(String user){
+		Connection conn = getCon();
+		
+		try {
+			if(conn!=null)
+			{
+				String sql = "SELECT * FROM user_data WHERE username = ?";
 				PreparedStatement ps = conn.prepareStatement(sql);
 				
 				ps.setString(1, user);
 				ResultSet rs = ps.executeQuery();
 				
-				if(rs.next()) {		
-					password = rs.getString("password");
-				}
-				if(pass.equals(password)){
+				if(rs.next()){	
+					System.out.println(user+"---");
 					return true; 
 				}
 			}

@@ -1,12 +1,13 @@
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.ArrayList;
 
 public class WaitForLoginOrSignup extends Thread{
 	Socket socket;
-	private DataInputStream dIn;
-	private DataOutputStream dOut;
+	private ObjectInputStream obIn;
+	private ObjectOutputStream obOut;
 	
 	public WaitForLoginOrSignup(Socket socket) {
 		this.socket = socket;
@@ -15,9 +16,9 @@ public class WaitForLoginOrSignup extends Thread{
 	
 	private void setupStreams(){
         try {
-            dOut = new DataOutputStream(socket.getOutputStream());
-            dOut.flush();
-            dIn = new DataInputStream(socket.getInputStream());
+            obOut = new ObjectOutputStream(socket.getOutputStream());
+            obOut.flush();
+            obIn = new ObjectInputStream(socket.getInputStream());
         } catch (IOException ex) {}
     }
 	
@@ -27,42 +28,35 @@ public class WaitForLoginOrSignup extends Thread{
 		
 		while(running){
 			try {
-				String i = dIn.readUTF();
-				String full_name;
-				String username;
-				String password;
-				switch(i){
-				case "1":				//For Login
-					username = dIn.readUTF();
-		            password = dIn.readUTF();
-		            System.out.println("Login Request from username "+username);
+				ArrayList<String> req = (ArrayList<String>) obIn.readObject();
+				
+				switch(req.get(0)){
+				case "a":				//For Login  index 1 username, index 2 password
+		            System.out.println("Login Request from username "+req.get(1));
 		            
-		            if(LoginUtils.isUser(username, password)){
-		            	full_name = LoginUtils.getFullName(username);
-		            	ConnectionThread ct = new ConnectionThread(socket, full_name, username, dIn, dOut);
+		            if(LoginUtils.isUser(req.get(1), req.get(2))){
+		            	String full_name = LoginUtils.getFullName(req.get(1));
+		            	ConnectionThread ct = new ConnectionThread(socket, full_name, req.get(1), obIn, obOut);
 		            	ServerBL.addPlayer(ct);
 		            	ct.start();
-		            	System.out.println(username + " connected.");
+		            	System.out.println(req.get(1) + " connected.");
 		            	running = false;
 		            }else{
-		            	dOut.writeUTF("Invalid username or password");
-		            	System.out.println("Invalid username or password ("+ username +", "+ password +")");
+		            	obOut.writeUTF("Invalid username or password");
+		            	System.out.println("Invalid username or password ("+ req.get(1) +", "+ req.get(2) +")");
 		            }
 					break;
-				case "2":				//For SignUp
+				case "b":				//For SignUp index 1 full_name, index 2 username, index 3 password
 					System.out.println("New signup Request");
-					full_name = dIn.readUTF();
-					username = dIn.readUTF();
-		            password = dIn.readUTF();
 		            
-		            if(LoginUtils.isUser(username, password)){
-		            	dOut.writeUTF("Username "+ username + " is already a user.");
-		            	System.out.println(username + " is already a user.");
+		            if(LoginUtils.isUser(req.get(2))){
+		            	obOut.writeUTF("Username "+ req.get(2) + " is already a user.");
+		            	System.out.println(req.get(2) + " is already a user.");
 		            }else{
-		            	LoginUtils.registerUser(full_name,username,password);
-		            	dOut.writeUTF("Successfully Registered");
-		            	System.out.println("Successfully Registered."+"Username :"+ username + ", Fullname :"+full_name);
-		            	ConnectionThread ct = new ConnectionThread(socket, full_name, username, dIn, dOut);
+		            	LoginUtils.registerUser(req.get(1),req.get(2),req.get(3));
+		            	obOut.writeUTF("Successfully Registered");
+		            	System.out.println("Successfully Registered."+"Username :"+ req.get(2) + ", Fullname :"+req.get(1));
+		            	ConnectionThread ct = new ConnectionThread(socket, req.get(1), req.get(2), obIn, obOut);
 		            	ServerBL.addPlayer(ct);
 		            	ct.start();
 		            	running = false;
@@ -72,8 +66,11 @@ public class WaitForLoginOrSignup extends Thread{
 					closeCon();
 					running = false;
 				}
-				
 			} catch (IOException e) {
+				running= false;
+				closeCon();
+				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
 				running= false;
 				closeCon();
 				e.printStackTrace();
@@ -87,8 +84,8 @@ public class WaitForLoginOrSignup extends Thread{
 		if(socket!=null){
 			try {
 				socket.close();
-				dIn.close();
-				dOut.close();
+				obIn.close();
+				obOut.close();
 			} catch (IOException e) {e.printStackTrace();}
 		}
 	}
