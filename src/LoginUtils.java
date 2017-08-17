@@ -100,7 +100,7 @@ public class LoginUtils {
 		return false;
 	}
 	
-	public static String getFullname(String username)
+	public static String getFullname(String uname)
 	{
 		try {
 
@@ -108,15 +108,15 @@ public class LoginUtils {
 			String fullname = null;
 			if(conn!=null)
 			{
-				String sql = "SELECT fullname FROM user_data WHERE username = ?";
+				String sql = "SELECT full_name FROM user_data WHERE username = ?";
 				PreparedStatement ps = conn.prepareStatement(sql);
 				
-				ps.setString(1, username);
+				ps.setString(1, uname);
 				
 				ResultSet rs = ps.executeQuery();
 				while(rs.next())
 						{
-							fullname = rs.getString("username");
+							fullname = rs.getString("full_name");
 						}
 				return fullname;
 			}
@@ -127,16 +127,6 @@ public class LoginUtils {
 		}
 		
 		return "null";
-	}
-	
- 
-	
-	
-	public static void main(String args[])
-	{
-		
-				
-		
 	}
 	
 }
