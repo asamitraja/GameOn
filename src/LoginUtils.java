@@ -1,8 +1,7 @@
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
-import java.sql.Statement;
-import java.util.Scanner;
+import java.sql.ResultSet;
 
 public class LoginUtils {
 	
@@ -23,27 +22,22 @@ public class LoginUtils {
 	}
 	
 	
-	public static boolean Register()
+	public static void registerUser(String fullname,String username,String password  )
 	{		
-		Scanner sc = new Scanner(System.in);
+//		Scanner sc = new Scanner(System.in);
 			
-		System.out.println("Enter Full Name\n");
-		String fullname = sc.nextLine();
-		
-		System.out.println("Enter User Name\n");
-		String username = sc.nextLine();
-		
-		System.out.println("Enter Password\n");
-		String password = sc.nextLine();
-		
-		LoginUtils lu = new LoginUtils();
-		PreparedStatement ps = null;
-		
-		Connection conn = lu.getCon();
+//		System.out.println("Enter Full Name\n");
+//		String fullname = sc.nextLine();
+//		
+//		System.out.println("Enter User Name\n");
+//		String username = sc.nextLine();
+//		
+//		System.out.println("Enter Password\n");
+//		String password = sc.nextLine();
 		
 		try {
-	        Statement stmt = conn.createStatement();
-			
+			PreparedStatement ps = null;
+			Connection conn = getCon();
 			if(conn !=null)
 			{
 				
@@ -56,43 +50,92 @@ public class LoginUtils {
 				ps.setString(3,password);
 				
 				ps.executeUpdate();
-				System.out.println("Registeration Successfull");
 				
 				conn.close();
-
-				return true;
 			}
 			
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
 		
+	}
+	
+	public static boolean Login(String user,String pass)
+	{
+//		Scanner sc = new Scanner(System.in);
+//		
+//		System.out.println("Enter Username\n");
+//		String user = sc.nextLine();
+//		
+//		System.out.println("Enter Password\n");
+//		String pass = sc.nextLine();
+		
+		
+		String password=null;
+		Connection conn = getCon();
+		
+		try {
+			if(conn!=null)
+			{
+				String sql = "SELECT password FROM user_data WHERE username = ? ";
+				PreparedStatement ps = conn.prepareStatement(sql);
+				
+				ps.setString(1, user);
+				ResultSet rs = ps.executeQuery();
+				
+				while(rs.next()) {		
+				password = rs.getString("password");
+				}
+				if(pass.equals(password))
+				{
+					return true; 
+				}
+			}
+			
+		}catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		
 		return false;
 	}
 	
-	public static boolean Login()
+	public static String getFullname(String username)
 	{
-		return true;
+		try {
+
+			Connection conn = getCon();
+			String fullname = null;
+			if(conn!=null)
+			{
+				String sql = "SELECT fullname FROM user_data WHERE username = ?";
+				PreparedStatement ps = conn.prepareStatement(sql);
+				
+				ps.setString(1, username);
+				
+				ResultSet rs = ps.executeQuery();
+				while(rs.next())
+						{
+							fullname = rs.getString("username");
+						}
+				return fullname;
+			}
+			
+		}catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		
+		return "null";
 	}
+	
+ 
 	
 	
 	public static void main(String args[])
 	{
 		
-		Scanner sc = new Scanner(System.in);
-		LoginUtils lu = new LoginUtils();
-		
-		System.out.println("1: Sign up\n2:Login\n");
-		int choice = sc.nextInt();
-		
-		if(choice == 1)
-		{
-			lu.Register();
-		}
-		else if(choice == 2)
-		{
-			lu.Login();
-		}
+				
 		
 	}
 	
