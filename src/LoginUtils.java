@@ -100,12 +100,12 @@ public class LoginUtils {
 		return false;
 	}
 	
-	public static String getFullname(String uname)
+	public static String getFullName(String uname)
 	{
+		String fullname = null;
 		try {
 
 			Connection conn = getCon();
-			String fullname = null;
 			if(conn!=null)
 			{
 				String sql = "SELECT full_name FROM user_data WHERE username = ?";
@@ -114,11 +114,9 @@ public class LoginUtils {
 				ps.setString(1, uname);
 				
 				ResultSet rs = ps.executeQuery();
-				while(rs.next())
-						{
-							fullname = rs.getString("full_name");
-						}
-				return fullname;
+				if(rs.next()){
+					fullname = rs.getString("full_name");
+				}
 			}
 			
 		}catch(Exception e)
@@ -126,7 +124,7 @@ public class LoginUtils {
 			e.printStackTrace();
 		}
 		
-		return "null";
+		return fullname;
 	}
 	
 }
