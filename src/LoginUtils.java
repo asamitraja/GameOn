@@ -13,5 +13,22 @@ public class LoginUtils {
 		}catch(Exception e){}
 		return con;
 	}
+
+	public static boolean isUser(String username, String password) {
+		// TODO Auto-generated method stub
+		boolean tof=false;
+		
+		return tof;
+	}
+
+	public static String getFullName(String username) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public static void registerUser(String full_name, String username, String password) {
+		// TODO Auto-generated method stub
+		
+	}
 	
 }
